@@ -200,3 +200,172 @@ LEFT JOIN Employees E
 ON B.Building_name = E.Building
 WHERE Building IS NULL;
 
+ 
+	--  SQL Lesson 9: Queries with expressions  ------------------------------
+    
+-- 1.List all movies and their combined sales in millions of dollars 
+SELECT Title, (b.Domestic_sales + b.International_sales)/1000000 AS 'Combined Sales' 
+FROM Movies m
+LEFT JOIN Boxoffice b
+    ON m.Id = b.Movie_id;
+
+
+-- 2. List all movies and their ratings in percent 
+SELECT Title, b.Rating * 10 AS 'Ratings(%)' 
+FROM Movies m
+LEFT JOIN Boxoffice b
+    ON m.Id = b.Movie_id;
+
+
+-- 3. List all movies that were released on even number years 
+ SELECT Title, Year 
+FROM Movies m
+LEFT JOIN Boxoffice b
+    ON m.Id = b.Movie_id
+WHERE Year % 2 = 0;
+ 
+ 
+	--  SQL Lesson 10: Queries with aggregates (Pt. 1)  ------------------------------
+    
+-- 1. Find the longest time that an employee has been at the studio 
+SELECT MAX(Years_employed)
+FROM Employees;
+
+
+-- 2. For each role, find the average number of years employed by employees in that role 
+SELECT Role, AVG(Years_Employed)
+FROM Employees
+GROUP BY Role;
+
+
+-- 3. Find the total number of employee years worked in each building 
+SELECT Building, SUM(Years_Employed)
+FROM Employees
+GROUP BY Building;
+
+
+	--  SQL Lesson 11: Queries with aggregates (Pt. 2)  ------------------------------
+    
+-- 1. Find the number of Artists in the studio (without a HAVING clause) 
+SELECT COUNT(Role)
+FROM Employees
+WHERE Role = "Artist";
+
+
+-- 2. Find the number of Employees of each role in the studio 
+SELECT Role, COUNT(Role)
+FROM Employees
+GROUP BY Role;
+
+
+-- 3. Find the total number of years employed by all Engineers 
+SELECT Role, SUM(Years_employed)
+FROM Employees
+GROUP BY Role
+HAVING Role = 'Engineer';
+ 
+  
+	--  SQL Lesson 12: Order of execution of a Query  ------------------------------
+    
+-- 1. Find the number of movies each director has directed 
+SELECT Director, COUNT(Title)
+FROM movies
+GROUP BY Director;
+
+
+-- 2. Find the total domestic and international sales that can be attributed to each director 
+SELECT Director, SUM(b.Domestic_sales + b.International_sales)
+FROM Movies m
+LEFT JOIN Boxoffice b
+    ON m.Id = b.Movie_id
+GROUP BY Director;
+ 
+ 
+	--  SQL Lesson 13: Inserting rows  ------------------------------
+    
+-- 1.
+
+
+-- 2.
+
+
+-- 3.
+
+
+-- 4.
+ 
+ 
+    
+	--  SQL Lesson 6: Multi-table queries with JOINs  ------------------------------
+    
+-- 1.
+
+
+-- 2.
+
+
+-- 3.
+
+
+-- 4.
+ 
+ 
+	--  SQL Lesson 6: Multi-table queries with JOINs  ------------------------------
+    
+-- 1.
+
+
+-- 2.
+
+
+-- 3.
+
+
+-- 4.
+ 
+ 
+  
+	--  SQL Lesson 6: Multi-table queries with JOINs  ------------------------------
+    
+-- 1.
+
+
+-- 2.
+
+
+-- 3.
+
+
+-- 4.
+ 
+ 
+ 
+	--  SQL Lesson 6: Multi-table queries with JOINs  ------------------------------
+    
+-- 1.
+
+
+-- 2.
+
+
+-- 3.
+
+
+-- 4.
+ 
+ 
+    
+	--  SQL Lesson 6: Multi-table queries with JOINs  ------------------------------
+    
+-- 1.
+
+
+-- 2.
+
+
+-- 3.
+
+
+-- 4.
+ 
+ 
