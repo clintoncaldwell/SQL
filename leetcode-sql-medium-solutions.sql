@@ -87,4 +87,37 @@ WHERE (customer_id, order_date) IN (
 
 
 
+/* 550. Game Play Analysis IV ------------------------------------------------------------------
+https://leetcode.com/problems/game-play-analysis-iv?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to report the fraction of players that logged in again on the day 
+after the day they first logged in, rounded to 2 decimal places. In other words, you 
+need to count the number of players that logged in for at least two consecutive days 
+starting from their first login date, then divide that number by the total number of players. */
+
+SELECT ROUND( COUNT(a2_event_date) / SUM(IF(a2_event_date IS NULL, 1, 1)) , 2) AS fraction
+FROM (
+    SELECT a2_event_date
+    FROM (
+        SELECT a1.player_id AS a1_id, a1.event_date AS a1_event_date, a2.event_date AS a2_event_date
+        FROM Activity a1
+        LEFT JOIN Activity a2
+        ON a1.player_id = a2.player_id
+        AND a1.event_date = DATE_SUB(a2.event_date, INTERVAL 1 DAY)
+        GROUP BY a1.player_id , a1.event_date
+        HAVING MIN(a1_event_date)
+        ORDER BY a1.player_id, a1.event_date ASC
+    ) a3
+    GROUP BY a1_id
+) a4
+
+
+
+
+
+
+
+
+
+
+
 -- ---------------------------------------------------------------------------------------------
