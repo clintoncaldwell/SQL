@@ -142,5 +142,69 @@ HAVING COUNT(DISTINCT product_key) = (
 
 
 
+/* 180. Consecutive Numbers --------------------------------------------------------------------
+https://leetcode.com/problems/consecutive-numbers?envType=study-plan-v2&envId=top-sql-50
+- Find all numbers that appear at least three times consecutively. */
+
+SELECT a.num AS ConsecutiveNums
+FROM Logs a 
+LEFT JOIN Logs b
+    ON a.id = b.id -1
+LEFT JOIN Logs c
+    ON a.id = c.id -2
+WHERE a.num = b.num AND a.num = c.num
+GROUP BY a.num;
+
+
+
+/* 1164. Product Price at a Given Date ---------------------------------------------------------
+https://leetcode.com/problems/product-price-at-a-given-date?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to find the prices of all products on 2019-08-16. 
+Assume the price of all products before any change is 10. */
+
+/* Process:
+Goal: Find current prices on 2019-08-16
+- Filter the entries where date <= to 2019-08-16
+    - Then find the MAX(date) of this subgroup
+- Join the two tables through the primary key, product_id
+    - Filter the entries using the date results from the previous table
+		- If the date is NULL, then set the price to 10
+*/
+SELECT DISTINCT p1.product_id, 
+    CASE WHEN p2.target_date IS NOT NULL THEN p1.new_price ELSE 10 END AS price
+FROM products p1
+LEFT JOIN (
+    SELECT product_id, MAX(change_date) AS target_date
+    FROM products
+    WHERE change_date <= '2019-08-16'
+    GROUP BY product_id
+) p2 
+ON p1.product_id = p2.product_id
+WHERE (p1.product_id, p1.change_date) = (p2.product_id, p2.target_date)
+    OR ISNULL(p2.target_date);
+
+
+
+/* 1204. Last Person to Fit in the Bus ---------------------------------------------------------
+https://leetcode.com/problems/last-person-to-fit-in-the-bus?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to find the person_name of the last person that can fit on the bus without 
+exceeding the weight limit. The test cases are generated such that the first person does not 
+exceed the weight limit.
+Note that only one person can board the bus at any given turn. */
+
+SELECT person_name
+FROM (
+    SELECT person_name, turn, (
+		SELECT SUM(weight) 
+		FROM Queue q2
+		WHERE q1.turn >= q2.turn
+	) AS total_weight
+	FROM Queue q1
+	HAVING total_weight <= 1000
+    ORDER BY turn DESC
+    LIMIT 1
+) q3;
+
+
 
 -- ---------------------------------------------------------------------------------------------
