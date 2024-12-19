@@ -108,14 +108,37 @@ FROM (
         ORDER BY a1.player_id, a1.event_date ASC
     ) a3
     GROUP BY a1_id
-) a4
+) a4;
 
 
 
+/* 1070. Product Sales Analysis III -------------------------------------------------------------
+https://leetcode.com/problems/product-sales-analysis-iii?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to select the product id, year, quantity, and price for the first year
+of every product sold. */
+
+SELECT product_id, year AS first_year, quantity, price
+FROM Sales
+WHERE (product_id, year) IN (
+    SELECT product_id, MIN(year)
+    FROM Sales
+    GROUP BY product_id
+);
 
 
 
+/* 1045. Customers Who Bought All Products -----------------------------------------------------
+https://leetcode.com/problems/customers-who-bought-all-products?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to report the customer ids from the Customer table that bought all the 
+products in the Product table. */
 
+SELECT customer_id
+FROM Customer
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_key) = (
+    SELECT COUNT(product_key)
+    FROM Product
+);
 
 
 
