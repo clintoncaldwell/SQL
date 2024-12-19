@@ -194,15 +194,15 @@ Note that only one person can board the bus at any given turn. */
 
 SELECT person_name
 FROM (
-    SELECT person_name, turn, (
+	SELECT person_name, turn, (
 		SELECT SUM(weight) 
 		FROM Queue q2
 		WHERE q1.turn >= q2.turn
 	) AS total_weight
 	FROM Queue q1
 	HAVING total_weight <= 1000
-    ORDER BY turn DESC
-    LIMIT 1
+	ORDER BY turn DESC
+	LIMIT 1
 ) q3;
 
 
