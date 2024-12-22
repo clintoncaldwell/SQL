@@ -223,7 +223,7 @@ SELECT 'High Salary' AS category, SUM(income>50000) AS accounts_count FROM Accou
 
 
 
-/* 626. Exchange Seats ------------------------------------------------------------------------
+/* 626. Exchange Seats -------------------------------------------------------------------------
 https://leetcode.com/problems/exchange-seats?envType=study-plan-v2&envId=top-sql-50
 - Write a solution to swap the seat id of every two consecutive students. 
 If the number of students is odd, the id of the last student is not swapped.
@@ -238,7 +238,38 @@ LEFT JOIN Seat s2
             THEN s.id = s2.id -1
         ELSE s.id = s2.id +1
         END
-    )
+    );
+
+
+
+/* 1341. Movie Rating --------------------------------------------------------------------------
+https://leetcode.com/problems/movie-rating?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to:
+    Find the name of the user who has rated the greatest number of movies. In case of a tie, 
+    return the lexicographically smaller user name.
+    Find the movie name with the highest average rating in February 2020. In case of a tie, 
+    return the lexicographically smaller movie name. */
+
+(
+SELECT u.name AS results
+FROM MovieRating mr2
+LEFT JOIN Users u
+    ON mr2.user_id = u.user_id
+GROUP BY mr2.user_id
+ORDER BY COUNT(mr2.user_id) DESC, u.name
+LIMIT 1
+)
+UNION ALL
+(
+SELECT m.title AS results
+FROM MovieRating mr
+LEFT JOIN Movies m
+    ON mr.movie_id = m.movie_id
+WHERE DATE_FORMAT(created_at, "%Y-%m") = '2020-02'
+GROUP BY mr.movie_id
+ORDER BY AVG(mr.rating) DESC, m.title
+LIMIT 1
+);
 
 
 
