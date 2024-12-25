@@ -1,2 +1,0 @@
--- Mode.com - Advanced SQL
-
