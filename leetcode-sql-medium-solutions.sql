@@ -356,4 +356,42 @@ LIMIT 1;
 
 
 
+/* 585. Investments in 2016 --------------------------------------------------------------------
+https://leetcode.com/problems/investments-in-2016?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to report the sum of all total investment values in 2016 tiv_2016, for all policyholders who:
+    - have the same tiv_2015 value as one or more other policyholders, and
+    - are not located in the same city as any other policyholder (i.e., the (lat, lon) attribute pairs must be unique).
+Round tiv_2016 to two decimal places. */
+
+SELECT ROUND(SUM(tiv_2016),2) AS tiv_2016
+FROM (
+    SELECT pid, tiv_2015, tiv_2016
+    FROM Insurance
+    GROUP BY lat, lon
+    HAVING COUNT(lat) = 1 OR COUNT(lon) = 1 
+) i
+WHERE pid NOT IN (
+    SELECT pid
+    FROM Insurance
+    GROUP BY tiv_2015
+    HAVING COUNT(tiv_2015) = 1
+);
+
+
+
+/* 176. Second Highest Salary ------------------------------------------------------------------
+https://leetcode.com/problems/second-highest-salary?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to find the second highest distinct salary from the Employee table. 
+If there is no second highest salary, return null  */
+
+SELECT salary AS SecondHighestSalary 
+FROM (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS `Rank`
+    FROM Employee 
+) e
+WHERE `Rank` = 2
+UNION
+SELECT NULL
+LIMIT 1;
+
 -- ---------------------------------------------------------------------------------------------

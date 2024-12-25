@@ -1,5 +1,24 @@
 -- Leetcode SQL Hard Difficulty Solutions
 
+/*  185. Department Top Three Salaries ------------------------------------------------------------------------
+https://leetcode.com/problems/department-top-three-salaries?envType=study-plan-v2&envId=top-sql-50
+- A company's executives are interested in seeing who earns the most money in each of the company's departments. 
+A high earner in a department is an employee who has a salary in the top three unique salaries for that department.
+Write a solution to find the employees who are high earners in each of the departments. */
+
+SELECT Department, Employee, Salary
+FROM (
+    SELECT d.name AS Department, e.name AS Employee, salary AS Salary,
+    DENSE_RANK() OVER (PARTITION BY departmentId ORDER BY salary DESC) AS d_rank
+    FROM Employee e
+    LEFT JOIN Department d
+        ON e.departmentId = d.id
+) e
+WHERE d_rank <= 3
+ORDER BY Department, salary DESC;
+
+
+
 /*  3374. First Letter Capitalization II ------------------------------------------------------------------------
 https://leetcode.com/problems/first-letter-capitalization-ii?envType=problem-list-v2&envId=database
 - Write a solution to transform the text in the content_text column by applying the following rules:
