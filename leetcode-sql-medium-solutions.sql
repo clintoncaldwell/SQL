@@ -272,5 +272,88 @@ LIMIT 1
 );
 
 
+/* 3220. Odd and Even Transactions -------------------------------------------------------------
+https://leetcode.com/problems/odd-and-even-transactions?envType=problem-list-v2&envId=database
+- Write a solution to find the sum of amounts for odd and even transactions for each day. 
+If there are no odd or even transactions for a specific date, display as 0.
+Return the result table ordered by transaction_date in ascending order. */
+
+SELECT transaction_date,
+SUM(CASE WHEN (amount % 2) > 0 THEN amount ELSE 0 END) AS odd_sum, 
+SUM(CASE WHEN (amount % 2) = 0 THEN amount ELSE 0 END) AS even_sum
+FROM transactions
+GROUP BY transaction_date
+ORDER BY transaction_date;
+
+
+
+/* 1393. Capital Gain/Loss ---------------------------------------------------------------------
+https://leetcode.com/problems/capital-gainloss?envType=problem-list-v2&envId=database
+- Write a solution to report the Capital gain/loss for each stock.
+The Capital gain/loss of a stock is the total gain or loss after buying and selling the stock 
+one or many times. Return the result table in any order. */
+
+SELECT stock_name, 
+    SUM(CASE WHEN operation = 'Buy' THEN price*-1 ELSE price END)
+    AS capital_gain_loss
+FROM Stocks
+GROUP BY stock_name;
+
+
+
+/* 1321. Restaurant Growth ---------------------------------------------------------------------
+https://leetcode.com/problems/restaurant-growth?envType=problem-list-v2&envId=database
+- You are the restaurant owner and you want to analyze a possible expansion 
+(there will be at least one customer every day).
+Compute the moving average of how much the customer paid in a seven days window 
+(i.e., current day + 6 days before). average_amount should be rounded to two decimal places.
+Return the result table ordered by visited_on in ascending order. */
+
+WITH grp_c AS (
+    SELECT customer_id, name, visited_on, SUM(amount) AS amount 
+    FROM Customer
+    GROUP BY visited_on
+)
+SELECT 
+visited_on, 
+(
+    SELECT SUM(amount)
+    FROM grp_c
+    WHERE visited_on BETWEEN DATE_SUB(g.visited_on, INTERVAL 6 DAY) AND g.visited_on
+) AS amount, 
+(
+    SELECT ROUND(AVG(amount),2)
+    FROM grp_c
+    WHERE visited_on BETWEEN DATE_SUB(g.visited_on, INTERVAL 6 DAY) AND g.visited_on
+) AS average_amount
+FROM grp_c g
+ORDER BY visited_on
+LIMIT 1000 OFFSET 6;
+
+
+
+/* 602. Friend Requests II: Who Has the Most Friends --------------------------------------------
+https://leetcode.com/problems/friend-requests-ii-who-has-the-most-friends?envType=study-plan-v2&envId=top-sql-50
+- Write a solution to find the people who have the most friends and the most friends number.
+The test cases are generated so that only one person has the most friends. */
+
+WITH sub AS(
+    SELECT requester_id AS id
+    FROM RequestAccepted 
+    UNION ALL
+    SELECT accepter_id 
+    FROM RequestAccepted 
+)
+SELECT *
+FROM ( 
+    SELECT id,
+    COUNT(id) AS num
+    FROM sub
+    GROUP BY id
+) s
+ORDER BY num DESC
+LIMIT 1;
+
+
 
 -- ---------------------------------------------------------------------------------------------
