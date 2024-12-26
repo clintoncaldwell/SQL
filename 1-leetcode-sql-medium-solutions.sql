@@ -394,4 +394,91 @@ UNION
 SELECT NULL
 LIMIT 1;
 
--- ---------------------------------------------------------------------------------------------
+
+
+/* 184. Department Highest Salary --------------------------------------------------------------
+https://leetcode.com/problems/department-highest-salary?envType=problem-list-v2&envId=database
+- Write a solution to find employees who have the highest salary in each of the departments.
+Return the result table in any order.  */
+
+SELECT Department, Employee, Salary
+FROM (
+    SELECT d.name AS Department, e.name AS Employee, salary AS Salary,
+        DENSE_RANK() OVER (PARTITION BY d.name ORDER BY salary DESC) AS r
+    FROM Employee e
+    LEFT JOIN Department d
+        ON e.departmentId = d.id
+) e2
+WHERE r = 1;
+
+
+
+/* 178. Rank Scores ----------------------------------------------------------------------------
+https://leetcode.com/problems/rank-scores?envType=problem-list-v2&envId=database
+- Write a solution to find the rank of the scores. 
+The ranking should be calculated according to the following rules:
+    -The scores should be ranked from the highest to the lowest.
+    -If there is a tie between two scores, both should have the same ranking.
+    -After a tie, the next ranking number should be the next consecutive integer value. 
+		In other words, there should be no holes between ranks.
+Return the result table ordered by score in descending order.  */
+
+SELECT score, 
+    DENSE_RANK() OVER (ORDER BY score DESC) AS `rank`
+FROM Scores;
+
+
+
+/* 177. Nth Highest Salary ---------------------------------------------------------------------
+https://leetcode.com/problems/nth-highest-salary?envType=problem-list-v2&envId=database
+- Write a solution to find the nth highest salary from the Employee table. 
+If there is no nth highest salary, return null.  */
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+  RETURN (
+        SELECT DISTINCT salary
+        FROM (
+            SELECT *, DENSE_RANK() OVER (ORDER BY salary DESC) AS r
+            FROM Employee
+        ) e
+        WHERE r = N
+  );
+END
+
+
+
+/* 1158. Market Analysis I ---------------------------------------------------------------------
+https://leetcode.com/problems/market-analysis-i?envType=problem-list-v2&envId=database
+- Write a solution to find for each user, the join date and the number of 
+orders they made as a buyer in 2019.  */
+
+SELECT user_id AS buyer_id, join_date, COUNT(buyer_id) AS orders_in_2019
+FROM Users u
+LEFT JOIN Orders o
+    ON u.user_id = o.buyer_id AND YEAR(order_date) = 2019
+GROUP BY u.user_id;
+
+    
+    
+/* 608. Tree Node ---------------------------------------------------------------------
+https://leetcode.com/problems/tree-node?envType=problem-list-v2&envId=database
+- Each node in the tree can be one of three types:
+    "Leaf": if the node is a leaf node.
+    "Root": if the node is the root of the tree.
+    "Inner": If the node is neither a leaf node nor a root node.
+Write a solution to report the type of each node in the tree.
+Return the result table in any order.  */
+
+WITH tree2 AS (
+    SELECT t.id, t.p_id, COUNT(t2.p_id) AS c_id
+    FROM Tree t
+    LEFT JOIN Tree t2
+        ON t.id = t2.p_id
+    GROUP BY t.id
+)
+SELECT id,
+    CASE WHEN p_id AND c_id THEN "Inner" WHEN p_id AND NOT c_id THEN "Leaf" ELSE "Root" END AS type
+FROM tree2;
+
+-- -----

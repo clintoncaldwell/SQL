@@ -19,6 +19,24 @@ ORDER BY Department, salary DESC;
 
 
 
+/* 601. Human Traffic of Stadium -------------------------------------------------------
+https://leetcode.com/problems/human-traffic-of-stadium?envType=problem-list-v2&envId=database
+- Write a solution to display the records with three or more rows with consecutive id's, 
+and the number of people is greater than or equal to 100 for each.
+Return the result table ordered by visit_date in ascending order.  */
+
+SELECT *
+FROM Stadium
+WHERE id IN (
+    SELECT (LEAD(id) OVER (ORDER BY id) = id+1 AND (LEAD(id,2) OVER (ORDER BY id) = id+2 OR LAG(id) OVER (ORDER BY id) = id-1)
+        OR (LAG(id) OVER (ORDER BY id) = id-1 AND LAG(id,2) OVER (ORDER BY id) = id-2)) 
+        * id AS id
+    FROM Stadium
+    WHERE people >= 100
+);
+    
+
+
 /*  3374. First Letter Capitalization II ------------------------------------------------------------------------
 https://leetcode.com/problems/first-letter-capitalization-ii?envType=problem-list-v2&envId=database
 - Write a solution to transform the text in the content_text column by applying the following rules:
@@ -79,3 +97,5 @@ FROM cte c1
 LEFT JOIN cte c2
 ON c1.content_id = c2.content_id -1
 GROUP BY c1.content_id;
+
+-- -----
