@@ -37,6 +37,28 @@ WHERE id IN (
     
 
 
+/* 262. Trips and Users ----------------------------------------------------------------
+https://leetcode.com/problems/trips-and-users?envType=problem-list-v2&envId=database
+- The cancellation rate is computed by dividing the number of canceled (by client or driver) 
+requests with unbanned users by the total number of requests with unbanned users on that day.
+Write a solution to find the cancellation rate of requests with unbanned users 
+(both client and driver must not be banned) each day between "2013-10-01" and "2013-10-03". 
+Round Cancellation Rate to two decimal points.  */
+
+WITH uid AS (
+    SELECT users_id
+    FROM Users
+    WHERE banned = "No" AND role != 'partner'
+)
+SELECT request_at AS Day, 
+    ROUND( SUM(CASE WHEN status != 'completed' THEN 1 ELSE 0 END) / COUNT(*) ,2) AS 'Cancellation Rate'
+FROM Trips
+WHERE client_id IN (TABLE uid) AND driver_id IN (TABLE uid)
+    AND request_at BETWEEN "2013-10-01" AND "2013-10-03"
+GROUP BY Day;
+
+
+
 /*  3374. First Letter Capitalization II ------------------------------------------------------------------------
 https://leetcode.com/problems/first-letter-capitalization-ii?envType=problem-list-v2&envId=database
 - Write a solution to transform the text in the content_text column by applying the following rules:
@@ -97,5 +119,3 @@ FROM cte c1
 LEFT JOIN cte c2
 ON c1.content_id = c2.content_id -1
 GROUP BY c1.content_id;
-
--- -----

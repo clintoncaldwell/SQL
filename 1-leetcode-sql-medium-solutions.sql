@@ -480,5 +480,3 @@ WITH tree2 AS (
 SELECT id,
     CASE WHEN p_id AND c_id THEN "Inner" WHEN p_id AND NOT c_id THEN "Leaf" ELSE "Root" END AS type
 FROM tree2;
-
--- -----
