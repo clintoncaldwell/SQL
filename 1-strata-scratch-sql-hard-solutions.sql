@@ -63,3 +63,43 @@ ORDER BY user;
     output: user id, popularity percentage
     order user id asc
 */
+
+
+
+/* Monthly Percentage Difference ------------------------------------------------------
+https://platform.stratascratch.com/coding/10319-monthly-percentage-difference?code_type=3
+- Given a table of purchases by date, calculate the month-over-month percentage change in revenue. 
+The output should include the year-month date (YYYY-MM) and percentage change, rounded to the 
+2nd decimal point, and sorted from the beginning of the year to the end of the year.
+The percentage change column will be populated from the 2nd month forward and can be calculated 
+as ((this month's revenue - last month's revenue) / last month's revenue)*100. */
+
+WITH ym AS (
+    SELECT DATE_FORMAT(created_at, "%Y-%m") AS yr_month, SUM(value) AS revenue  
+    FROM sf_transactions
+    GROUP BY yr_month
+)
+SELECT yr_month AS 'year_month', ROUND(((revenue - LAG(revenue) OVER (ORDER BY yr_month)) 
+    / LAG(revenue) OVER (ORDER BY yr_month)) * 100, 2) AS percentage_change
+FROM ym
+ORDER BY yr_month;
+
+
+
+/* Top Percentile Fraud ---------------------------------------------------------------
+https://platform.stratascratch.com/coding/10303-top-percentile-fraud?code_type=3
+- We want to identify the most suspicious claims in each state. We'll consider the top 5 
+percentile of claims with the highest fraud scores in each state as potentially fraudulent.
+Your output should include the policy number, state, claim cost, and fraud score. */
+
+SELECT policy_num, state, claim_cost, fraud_score
+FROM (
+    SELECT policy_num, state, claim_cost, fraud_score
+        , PERCENT_RANK() OVER (PARTITION BY state ORDER BY fraud_score DESC) AS prc_rank
+    FROM fraud_score
+) f
+WHERE prc_rank <= 0.05;
+
+/* 	Notes:
+	output: policy number, state, claim cost, fraud score
+    top 5 percentile - of highest fraud scores in EACH state - PERCENT_RANK() w/ partition */
