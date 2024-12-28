@@ -61,8 +61,7 @@ ORDER BY user;
     popularity percentage = (user's total number of friends / total number of unique users) * 100
         count from both columns
     output: user id, popularity percentage
-    order user id asc
-*/
+    order user id asc */
 
 
 
@@ -100,6 +99,69 @@ FROM (
 ) f
 WHERE prc_rank <= 0.05;
 
+
 /* 	Notes:
 	output: policy number, state, claim cost, fraud score
     top 5 percentile - of highest fraud scores in EACH state - PERCENT_RANK() w/ partition */
+    
+    
+    
+/* Premium vs Freemium ----------------------------------------------------------------
+https://platform.stratascratch.com/coding/10300-premium-vs-freemium?code_type=3
+- Find the total number of downloads for paying and non-paying users by date. Include only 
+records where non-paying customers have more downloads than paying customers. The output 
+should be sorted by earliest date first and contain 3 columns date, non-paying downloads, 
+paying downloads. */
+
+WITH users AS (
+    SELECT u.user_id AS user_id, u.acc_id AS acc_id, a.paying_customer, d.date, d.downloads
+    FROM ms_user_dimension u
+    LEFT JOIN ms_acc_dimension a
+        ON u.acc_id = a.acc_id
+    LEFT JOIN ms_download_facts d
+        ON u.user_id = d.user_id
+)
+SELECT date, SUM(CASE WHEN paying_customer = "no" THEN downloads ELSE 0 END) AS non_paying_downloads
+    , SUM(CASE WHEN paying_customer = "yes" THEN downloads ELSE 0 END) AS paying_downloads
+FROM users
+GROUP BY date
+HAVING non_paying_downloads > paying_downloads
+ORDER BY date;
+
+
+/*  Notes:
+    output: date, non-playing downloads, paying downloads
+        total number for both
+        include only rows WHERE non-paying customers > paying customers downloads
+        sorted by date ASC */
+
+
+
+/* Top 5 States With 5 Star Businesses ------------------------------------------------
+https://platform.stratascratch.com/coding/10046-top-5-states-with-5-star-businesses?code_type=3
+- Find the top 5 states with the most 5 star businesses. Output the state name along 
+with the number of 5-star businesses and order records by the number of 5-star businesses 
+in descending order. In case there are ties in the number of businesses, return all the 
+unique states. If two states have the same result, sort them in alphabetical order. */
+
+WITH yb AS (
+    SELECT state, five_star_counts, RANK() OVER (ORDER BY five_star_counts DESC) AS d_rank
+    FROM (
+        SELECT state, COUNT(stars) AS five_star_counts
+        FROM yelp_business
+        WHERE stars = 5
+        GROUP BY state
+    ) temp_yelp
+)
+SELECT state, five_star_counts
+FROM yb
+WHERE d_rank <= 5
+ORDER BY five_star_counts DESC, state;
+
+
+/* Notes:
+    output: state name, # of 5-star businesses 
+        order records by # of 5 star businesses DESC
+        Top 5 states w/ most 5 star businesses 
+            Same # of businesses -> return all unique states
+            Two states with the same result - Sort state name ASC */
