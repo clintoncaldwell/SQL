@@ -165,3 +165,50 @@ ORDER BY five_star_counts DESC, state;
         Top 5 states w/ most 5 star businesses 
             Same # of businesses -> return all unique states
             Two states with the same result - Sort state name ASC */
+            
+            
+
+/* Counting Instances in Text ---------------------------------------------------------
+https://platform.stratascratch.com/coding/9814-counting-instances-in-text?code_type=3
+- Find the number of times the words 'bull' and 'bear' occur in the contents. We're 
+counting the number of times the words occur so words like 'bullish' should not be 
+included in our count.
+Output the word 'bull' and 'bear' along with the corresponding number of occurrences. */
+
+WITH RECURSIVE cte(filename, contents, n, summ) AS (
+    SELECT filename, contents
+    , 1 AS n
+    , SUBSTRING_INDEX(SUBSTRING_INDEX(contents, " ", 1), " ", -1)
+    FROM google_file_store 
+    WHERE contents IS NOT NULL
+UNION ALL
+    SELECT filename, contents
+    , n+1
+    , SUBSTRING_INDEX(SUBSTRING_INDEX(contents, " ", n+1), " ", -1)
+    FROM cte
+    WHERE n < 1000
+)
+SELECT "bull" AS word, COUNT(*) AS count
+FROM cte
+WHERE summ = "Bull"
+UNION ALL
+SELECT "bear" AS word, COUNT(*) AS count
+FROM cte
+WHERE summ = "Bear";
+
+
+
+/* City With Most Amenities -----------------------------------------------------------
+https://platform.stratascratch.com/coding/9633-city-with-most-amenities?code_type=3
+- You're given a dataset of searches for properties on Airbnb. For simplicity, let's 
+say that each search result (i.e., each row) represents a unique host. Find the city 
+with the most amenities across all their host's properties. Output the name of the city. */
+
+WITH asd AS (
+    SELECT city, SUM(LENGTH(amenities) - LENGTH(REPLACE(amenities, ",",""))+1) AS a_count
+    FROM airbnb_search_details
+    GROUP BY city
+)
+SELECT city 
+FROM asd
+LIMIT 1;
