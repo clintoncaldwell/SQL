@@ -259,4 +259,16 @@ Each page contains at most 1 recipe. If the page does not contain a recipe, the 
 cell should remain empty (NULL value). Page 0 (the internal side of the front cover) is 
 guaranteed to be empty. */
 
-
+WITH RECURSIVE c AS (
+    SELECT 0 AS k
+    UNION ALL
+    SELECT k+2
+    FROM c
+    WHERE k+2 < (SELECT MAX(page_number) FROM cookbook_titles)
+)
+SELECT c.k, c2.title, c3.title
+FROM c
+LEFT JOIN cookbook_titles c2
+    ON c.k = c2.page_number
+LEFT JOIN cookbook_titles c3
+    ON c.k = c3.page_number -1;
