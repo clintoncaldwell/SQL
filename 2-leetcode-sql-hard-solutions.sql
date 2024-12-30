@@ -68,54 +68,31 @@ https://leetcode.com/problems/first-letter-capitalization-ii?envType=problem-lis
     All other formatting and spacing should remain unchanged 
 Return the result table that includes both the original content_text and the modified text following the above rules. */
 
-WITH RECURSIVE cte AS
-(
-    SELECT content_id, 
-    content_text,
-    CASE 
-        WHEN LOCATE("-", SUBSTRING_INDEX(content_text ," ", 1) ) 
-        THEN CONCAT(LEFT(
-                CONCAT(LEFT(UPPER(SUBSTRING_INDEX(content_text ," ", 1) ),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(content_text ," ", 1) ," ", 1)),2))
-            , LOCATE("-", SUBSTRING_INDEX(content_text ," ", 1) )), UPPER(SUBSTR(
-                CONCAT(LEFT(UPPER(SUBSTRING_INDEX(content_text ," ", 1) ),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(content_text ," ", 1) ," ", 1)),2))
-            , LOCATE("-", SUBSTRING_INDEX(content_text ," ", 1) )+1, 1)), SUBSTR(
-                CONCAT(LEFT(UPPER(SUBSTRING_INDEX(content_text ," ", 1) ),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(content_text ," ", 1) ," ", 1)),2))
-            , LOCATE("-", SUBSTRING_INDEX(content_text ," ", 1) )+2)
-            )
-        ELSE CONCAT(LEFT(UPPER(SUBSTRING_INDEX(content_text ," ", 1) ),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(content_text ," ", 1) ," ", 1)),2))
-    END
-    AS converted_text,
-    1 AS cnt
+WITH RECURSIVE cte(n, content_id, content_text, split_text) AS (
+    SELECT 1
+        , content_id, content_text
+        , SUBSTRING_INDEX(LOWER(content_text)," ", 1)
     FROM user_content
-    UNION 
-
-    SELECT c.content_id,
-    c.content_text,
-    CONCAT_WS(" ", converted_text,
-        CASE 
-            WHEN LOCATE("-", SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)) 
-            THEN CONCAT(LEFT(
-                    CONCAT(LEFT(UPPER(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)," ", 1)),2))
-                , LOCATE("-", SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1))), UPPER(SUBSTR(
-                    CONCAT(LEFT(UPPER(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)," ", 1)),2))
-                , LOCATE("-", SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1))+1, 1)), SUBSTR(
-                    CONCAT(LEFT(UPPER(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)," ", 1)),2))
-                , LOCATE("-", SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1))+2)
-            )
-            ELSE CONCAT(LEFT(UPPER(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)),1),SUBSTR(LOWER(SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1)," ", 1)),2))
-    END
-    ),
-    cnt+1
-    FROM cte c
-    LEFT JOIN user_content u
-    ON c.content_id = u.content_id
-    WHERE converted_text != ""
-        AND SUBSTRING_INDEX(SUBSTR(u.content_text, LENGTH(SUBSTRING_INDEX(u.content_text," ", cnt))+2) ," ", 1) != ""  
+    UNION ALL
+    SELECT n+1
+        , content_id, content_text
+        , SUBSTRING_INDEX(SUBSTRING_INDEX(LOWER(content_text)," ", n+1)," ", -1)
+    FROM cte 
+    WHERE n < 100 AND LENGTH(SUBSTRING_INDEX(content_text," ", n)) != LENGTH(content_text)
 )
-SELECT c1.content_id,
-    c1.content_text AS original_text,
-    MAX(c1.converted_text) AS converted_text
-FROM cte c1
-LEFT JOIN cte c2
-ON c1.content_id = c2.content_id -1
-GROUP BY c1.content_id;
+SELECT content_id, content_text AS original_text
+    , TRIM(REPLACE(GROUP_CONCAT(
+    CONCAT(UPPER(LEFT(split_text, 1)),SUBSTRING(split_text, 2, LENGTH(split_text)-1))
+    ORDER BY n), ",", " ")) AS converted_text
+FROM (
+    SELECT n, content_id, content_text
+    , CASE WHEN LOCATE("-", split_text)
+        THEN CONCAT( LEFT(split_text, LOCATE("-", split_text))
+        , UPPER(SUBSTR(split_text, LOCATE("-", split_text)+1, 1))
+        , SUBSTR(split_text, LOCATE("-", split_text)+2, LENGTH(split_text)-LOCATE("-", split_text)+2)
+        )
+        ELSE split_text
+    END AS split_text
+    FROM cte
+) t
+GROUP BY content_id;
