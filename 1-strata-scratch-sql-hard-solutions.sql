@@ -212,3 +212,51 @@ WITH asd AS (
 SELECT city 
 FROM asd
 LIMIT 1;
+
+
+
+/* Host Popularity Rental Prices ------------------------------------------------------
+https://platform.stratascratch.com/coding/9632-host-popularity-rental-prices?code_type=3
+- You’re given a table of rental property searches by users. The table consists of search 
+results and outputs host information for searchers. Find the minimum, average, maximum 
+rental prices for each host’s popularity rating. The host’s popularity rating is defined as below:
+	0 reviews: New
+	1 to 5 reviews: Rising
+	6 to 15 reviews: Trending Up
+	16 to 40 reviews: Popular
+	more than 40 reviews: Hot
+Tip: The id column in the table refers to the search ID. You'll need to create your own host_id 
+by concating price, room_type, host_since, zipcode, and number_of_reviews.
+Output host popularity rating and their minimum, average and maximum rental prices. */
+
+WITH r AS (
+    SELECT CONCAT_WS("_", price, room_type, host_since, zipcode, number_of_reviews) AS host_id
+        , price
+        , CASE WHEN number_of_reviews = 0 THEN "New"
+            WHEN number_of_reviews BETWEEN 1 AND 5 THEN "Rising"
+            WHEN number_of_reviews BETWEEN 6 AND 15 THEN "Trending Up"
+            WHEN number_of_reviews BETWEEN 16 AND 40 THEN "Popular"
+            WHEN number_of_reviews > 40 THEN "Hot"
+            END AS host_popularity
+    FROM airbnb_host_searches
+    GROUP BY host_id
+)
+SELECT host_popularity, MIN(price) AS minimum, AVG(price) AS average, MAX(price) AS maximum
+FROM r
+GROUP BY host_popularity;
+
+
+
+/* Cookbook Recipes -------------------------------------------------------------------
+https://platform.stratascratch.com/coding/2089-cookbook-recipes?code_type=3
+- You are given the table with titles of recipes from a cookbook and their page 
+numbers. You are asked to represent how the recipes will be distributed in the book.
+Produce a table consisting of three columns: left_page_number, left_title and right_title. 
+The k-th row (counting from 0), should contain the number and the title of the page with 
+the number 2×k2×k in the first and second columns respectively, and the title of the page 
+with the number 2×k+12×k+1 in the third column.
+Each page contains at most 1 recipe. If the page does not contain a recipe, the appropriate 
+cell should remain empty (NULL value). Page 0 (the internal side of the front cover) is 
+guaranteed to be empty. */
+
+
