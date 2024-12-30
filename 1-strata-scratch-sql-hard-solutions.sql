@@ -272,3 +272,52 @@ LEFT JOIN cookbook_titles c2
     ON c.k = c2.page_number
 LEFT JOIN cookbook_titles c3
     ON c.k = c3.page_number -1;
+
+
+
+/* The Most Popular Client_Id Among Users Using Video and Voice Calls -----------------
+https://platform.stratascratch.com/coding/2029-the-most-popular-client_id-among-users-using-video-and-voice-calls?code_type=3
+- Select the most popular client_id based on a count of the number of 
+users who have at least 50% of their events from the following list: 
+'video call received', 'video call sent', 'voice call received', 'voice call sent'. */
+
+WITH e AS (
+    SELECT user_id, client_id, event_type
+    FROM fact_events
+    GROUP BY user_id, event_type
+)
+SELECT client_id
+FROM e
+WHERE user_id IN (
+    SELECT user_id
+    FROM e
+    GROUP BY user_id
+    HAVING COUNT(user_id) >= 2
+)
+GROUP BY client_id
+ORDER BY COUNT(client_id) DESC
+LIMIT 1;
+
+
+
+/* Marketing Campaign Success [Advanced] ----------------------------------------------
+https://platform.stratascratch.com/coding/514-marketing-campaign-success-advanced?code_type=3
+- You have a table of in-app purchases by user. Users that make their first in-app purchase 
+are placed in a marketing campaign where they see call-to-actions for more in-app purchases. 
+Find the number of users that made additional in-app purchases due to the success of the 
+marketing campaign.
+The marketing campaign doesn't start until one day after the initial in-app purchase so users 
+that only made one or multiple purchases on the first day do not count, nor do we count users 
+that over time purchase only the products they purchased on the first day. */
+
+WITH marketing_cte AS (
+    SELECT m.user_id, m.created_at, m2.user_id AS m2_user, m2.created_at AS m2_created_at
+    FROM marketing_campaign m
+    LEFT JOIN marketing_campaign m2
+        ON m.user_id = m2.user_id
+        AND m2.created_at > m.created_at AND m2.product_id != m.product_id
+    GROUP BY m.user_id
+    HAVING MIN(m.created_at)
+)
+SELECT COUNT(m2_user)-1 AS users
+FROM marketing_cte;
