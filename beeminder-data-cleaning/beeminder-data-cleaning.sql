@@ -1,5 +1,8 @@
 -- Beeminder 2019 Data Cleaning
 
+/* 	Beeminder is a goal-tracking app where users set their own measurable goals 
+	and face financial consequences if they fail to meet their commitments. */
+
 -- ----------------------------------------------------------------
 -- 1. GOALS
 -- ----------------------------------------------------------------
